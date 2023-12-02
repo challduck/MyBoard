@@ -16,7 +16,7 @@ public class RefreshToken {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
-    private User userId;
+    private Member memberId;
 
     @Column(name = "refresh_token", nullable = false)
     private String refreshToken;

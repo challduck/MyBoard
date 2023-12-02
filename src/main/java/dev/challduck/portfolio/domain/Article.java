@@ -19,7 +19,7 @@ public class Article {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
-    private User userId;
+    private Member memberId;
 
     @NotNull
     @Column(name = "title")

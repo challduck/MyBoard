@@ -1,0 +1,3 @@
+INSERT INTO member(email, nickname, password, created_at, updated_at, last_login, last_login_ip) VALUES ('abc@a.com', 'user1', '$2a$10$jBPH3jwS7Lw8JlxL8NcIXeweGlkUF89wG6gDFudDb8u82RGh/HbEm', NOW(), NOW(), NOW(), '192.168.0.2');
+INSERT INTO member(email, nickname, password, created_at, updated_at, last_login, last_login_ip) VALUES ('abc@b.com', 'user2', '$2a$10$jBPH3jwS7Lw8JlxL8NcIXeweGlkUF89wG6gDFudDb8u82RGh/HbEm', NOW(), NOW(), NOW(), '192.168.0.3');
+INSERT INTO member(email, nickname, password, created_at, updated_at, last_login, last_login_ip) VALUES ('abc@c.com', 'user3', '$2a$10$jBPH3jwS7Lw8JlxL8NcIXeweGlkUF89wG6gDFudDb8u82RGh/HbEm', NOW(), NOW(), NOW(), '192.168.0.4');

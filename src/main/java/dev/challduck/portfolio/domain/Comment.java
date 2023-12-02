@@ -19,7 +19,7 @@ public class Comment {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
-    private User userId;
+    private Member memberId;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "article_id")
