@@ -34,11 +34,23 @@ dependencies {
 	runtimeOnly 'com.h2database:h2'
 
 	implementation 'io.jsonwebtoken:jjwt:0.9.1'
+	implementation 'javax.xml.bind:jaxb-api:2.3.1' // XML 문서와 Java 객체간 매핑을 자동화
 
 	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
-	testImplementation 'org.springframework.security:spring-security-test'
+	// 스프링 시큐리티를 테스트하기 위한 의존성 추가
+	implementation 'org.springframework.security:spring-security-test'
 
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+	implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.7.1'
+	implementation 'org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure' // springboot form login 사용자 설정
+
+	// ADMIN 의존성 추가
+//	implementation 'de.codecentric:spring-boot-admin-starter-server:3.1.3'
+
+	// 이미지 최적화 라이브러리
+	implementation 'net.coobird:thumbnailator:0.4.20'
+	// openApi 의존성
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0'
 }
 

@@ -10,10 +10,12 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.List;
 
 @Table(name = "member")
 @Entity
@@ -24,7 +26,7 @@ public class Member implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "member_id", updatable = false)
-    private Long memberId;
+    private Long id;
 
     @NotNull
     @Column(name = "email", unique = true)
@@ -57,14 +59,20 @@ public class Member implements UserDetails {
         this.password = password;
         this.nickname = nickname;
     }
-    @Builder
-    public Member(String email, String password){
-        this.email = email;
-        this.password = password;
+
+    public void setLastIpAddress(String lastLoginIp) {
+        this.lastLoginIp = lastLoginIp;
     }
+
+//    @Builder
+//    public Member(String email, String password){
+//        this.email = email;
+//        this.password = password;
+//    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        return List.of(new SimpleGrantedAuthority("user"));
     }
 
     @Override
@@ -99,5 +107,10 @@ public class Member implements UserDetails {
     public boolean isEnabled() {
         // 계정이 사용 가능한지 확인하는 로직
         return true;
+    }
+
+    public Member update(String name) {
+        this.nickname = name;
+        return this;
     }
 }

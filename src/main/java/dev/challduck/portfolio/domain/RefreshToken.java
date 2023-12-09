@@ -15,9 +15,19 @@ public class RefreshToken {
     private Long refreshTokenId;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "user_id")
-    private Member memberId;
+    @JoinColumn(name = "member_id")
+    private Member member;
 
     @Column(name = "refresh_token", nullable = false)
     private String refreshToken;
+
+    public RefreshToken(Member member,String refreshToken){
+        this.member = member;
+        this.refreshToken = refreshToken;
+    }
+
+    public RefreshToken update(String newRefreshToken){
+        this.refreshToken = newRefreshToken;
+        return this;
+    }
 }

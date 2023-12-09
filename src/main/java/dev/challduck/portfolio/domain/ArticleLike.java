@@ -22,4 +22,8 @@ public class ArticleLike {
     @JoinColumn(name = "article_id")
     private Article articleId;
 
+    public ArticleLike(Member member, Article article){
+        this.articleId = article;
+        this.memberId = member;
+    }
 }

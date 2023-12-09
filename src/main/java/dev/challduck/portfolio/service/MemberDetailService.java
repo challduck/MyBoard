@@ -1,5 +1,6 @@
 package dev.challduck.portfolio.service;
 
+import dev.challduck.portfolio.domain.Member;
 import dev.challduck.portfolio.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,11 +14,11 @@ public class MemberDetailService implements UserDetailsService {
 
     private final MemberRepository memberRepository;
 
+
+    // 사용자 이름(email)로 사용자의 정보를 가져오는 메서드
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-//        Member member = userRepository.findByEmail(email)
-//                .orElseThrow(()-> new UsernameNotFoundException("User not found with email : " + email));
-//        return new (member);
-        return null;
+        return memberRepository.findByEmail(email)
+                .orElseThrow(()-> new UsernameNotFoundException("User not found with email : " + email));
     }
 }

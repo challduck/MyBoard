@@ -1,4 +1,4 @@
-package dev.challduck.portfolio.dto;
+package dev.challduck.portfolio.dto.member;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

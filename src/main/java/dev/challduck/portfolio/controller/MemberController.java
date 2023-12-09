@@ -13,4 +13,7 @@ public class MemberController {
     // 사용자 회원가입 페이지 요청
     @GetMapping("/signup")
     private String signup () {return "signup";}
+
+    @GetMapping("/upload")
+    public String imgUpload(){return "upload";}
 }

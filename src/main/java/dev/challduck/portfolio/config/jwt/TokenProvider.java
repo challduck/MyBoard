@@ -6,6 +6,7 @@ import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -18,6 +19,7 @@ import java.util.Set;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class TokenProvider {
 
     private final JwtProperties jwtProperties;
@@ -29,7 +31,7 @@ public class TokenProvider {
 
     public String makeToken(Date expiry, Member member) {
         Date now = new Date();
-
+        log.info("secret Key : {}", jwtProperties.getSecretKey());
         return Jwts.builder()
                 .setHeaderParam(Header.TYPE, Header.JWT_TYPE) // 헤더 typ : JWT
                 // 내용 iss : properties에서 설정한 issure 값
@@ -37,8 +39,9 @@ public class TokenProvider {
                 .setIssuedAt(now) // 내용 iat : 현재 시간
                 .setExpiration(expiry) // 내용 exp : expiry 멤버 변수값
                 .setSubject(member.getEmail()) // 내용 sub : 유저의 이메일
-                .claim("id", member.getMemberId()) // 클레임 id : 유저 ID
+                .claim("id", member.getId()) // 클레임 id : 유저 ID
                 // 서명 : seceretKey와 함께 HS256 알고리즘으로 암호화
+
                 .signWith(SignatureAlgorithm.HS256, jwtProperties.getSecretKey())
                 .compact();
     }
