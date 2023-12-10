@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -45,8 +44,8 @@ public class ArticleImageService {
 
                 // 프로젝트 절대경로
                 String projectAbsolutePath = new File("").getAbsolutePath() + "\\";
-                String newFileName = fileName + imageType.getExtension();
-                ArticleImage articleImage = new ArticleImageUploadRequest().toEntity(article, fileName.toString() ,imageType.getExtension());
+                String newFileName = fileName + imageType.getFormat();
+                ArticleImage articleImage = new ArticleImageUploadRequest().toEntity(article, fileName.toString() ,imageType.getFormat());
 
                 File targetFile = new File(projectAbsolutePath + path + File.separator + newFileName);
                 log.info("targetFile : {}", targetFile);
@@ -55,7 +54,7 @@ public class ArticleImageService {
                 // 이미지 최적화 및 저장
                 Thumbnails.of(file.getInputStream())
                         .size(640, 480)
-                        .outputFormat(imageType.getExtension().substring(1))
+                        .outputFormat(imageType.getFormat().substring(1))
                         .toFile(targetFile);
 
                 // spring boot MultipartFile 객체로 image save

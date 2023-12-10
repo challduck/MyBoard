@@ -1,5 +1,6 @@
 package dev.challduck.portfolio.domain;
 
+import dev.challduck.portfolio.util.Role;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
@@ -16,6 +17,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Table(name = "member")
 @Entity
@@ -38,6 +41,11 @@ public class Member implements UserDetails {
 
     @Column(name = "password")
     private String password;
+
+    @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
+    @CollectionTable(name = "member_roles", joinColumns = @JoinColumn(name = "member_id"))
+    @Enumerated(EnumType.STRING)
+    private Set<Role> roles;
 
     @CreatedDate
     @Column(name = "created_at", updatable = false)
@@ -72,7 +80,11 @@ public class Member implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("user"));
+
+        //        return List.of(new SimpleGrantedAuthority("user"));
+        return getRoles().stream()
+                .map(role -> new SimpleGrantedAuthority(role.getKey()))
+                .collect(Collectors.toSet());
     }
 
     @Override

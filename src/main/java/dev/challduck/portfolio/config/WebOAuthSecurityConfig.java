@@ -90,7 +90,7 @@ public class WebOAuthSecurityConfig {
     public AuthenticationManager authenticationManager(
             HttpSecurity http,
             BCryptPasswordEncoder bCryptPasswordEncoder,
-            UserDetailsService userDetailsService) throws Exception {
+            UserDetailsService userDetailsService) {
 
         return http
                 .authenticationProvider(authenticationProvider(bCryptPasswordEncoder, userDetailsService))

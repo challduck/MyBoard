@@ -1,5 +1,10 @@
 package dev.challduck.portfolio.util;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@AllArgsConstructor
+@Getter
 public enum ImageType {
     JPEG(".jpeg", "image/jpeg"),
     JPG(".jpg", "image/jpeg"),
@@ -7,21 +12,8 @@ public enum ImageType {
     GIF(".gif", "image/gif"),
     WEBP(".webp", "image/webp");
 
-    private final String extension;
+    private final String format;
     private final String contentType;
-
-    ImageType(String extension, String contentType) {
-        this.extension = extension;
-        this.contentType = contentType;
-    }
-
-    public String getExtension() {
-        return extension;
-    }
-
-    public String getContentType() {
-        return contentType;
-    }
 
     public static ImageType findByContentType(String contentType) {
         for (ImageType imageType : values()) {
