@@ -1,41 +1,49 @@
 package dev.challduck.portfolio.service;
 
 import dev.challduck.portfolio.domain.Member;
-import dev.challduck.portfolio.dto.member.AddMemberRequest;
-import dev.challduck.portfolio.dto.member.SignInMemberRequest;
+import dev.challduck.portfolio.domain.RefreshToken;
+import dev.challduck.portfolio.dto.member.*;
+import dev.challduck.portfolio.exception.IncorrectPasswordException;
+import dev.challduck.portfolio.exception.InvalidPasswordException;
+import dev.challduck.portfolio.exception.UserNotFoundException;
 import dev.challduck.portfolio.repository.MemberRepository;
+import dev.challduck.portfolio.repository.RefreshTokenRepository;
+import dev.challduck.portfolio.util.Role;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
 @Transactional
+@Slf4j
 public class MemberService {
-
+    private final RefreshTokenRepository refreshTokenRepository;
     private final MemberRepository memberRepository;
     private final HttpServletRequest request;
 
-    // 이메일 중복 체크
-    public boolean checkEmailDuplicate(String email){
-        return memberRepository.existsByEmail(email);
-    }
-    // 닉네임 중복 체크
-    public boolean checkNicknameDuplicate(String nickname){
-        return memberRepository.existsByNickname(nickname);
-    }
-
     // 회원가입
     public Member saveMember(AddMemberRequest dto) {
+        if(memberRepository.existsByEmail(dto.getEmail())){
+            throw new DuplicateKeyException("이미 존재하는 이메일 입니다.");
+        }
         BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
         return memberRepository.save(
                 Member.builder()
                         .email(dto.getEmail())
                         .password(bCryptPasswordEncoder.encode(dto.getPassword()))
+                        .roles(Collections.singleton(Role.MEMBER))
                         .nickname(dto.getNickname())
                         .build());
     }
@@ -44,32 +52,35 @@ public class MemberService {
     public Member signIn(SignInMemberRequest dto) {
         BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
 
-        Optional<Member> optionalMember = memberRepository.findByEmail(dto.getEmail());
-//                .orElseThrow(()->new UserNotFoundException("존재하지않는 회원입니다."));
-        if (optionalMember.isEmpty()) { return null; }
+        Member member = memberRepository.findByEmail(dto.getEmail())
+                .orElseThrow(()->new UserNotFoundException("아이디 또는 비밀번호가 일치하지않습니다."));
 
-        // optional 사용했으니 데이터를 가져와보자.
-        Member member = optionalMember.get();
         // 일치하지 않으면 null 반환
-        if(!bCryptPasswordEncoder.matches(dto.getPassword(), member.getPassword())){ return null; }
+        if(!bCryptPasswordEncoder.matches(dto.getPassword(), member.getPassword())){
+            throw new IncorrectPasswordException("아이디 또는 비밀번호가 일치하지않습니다.");
+        }
 
         // LoadBalancer 를 구성하지 않았다면 request.getRemoteAddr 메서드로 가져온다.
-        updateMemberIp(optionalMember.get().getEmail(), request.getRemoteAddr());
-        // loadBalancer 를 구성하였다면 getClientIp 메서드를 사용하여 가져온다.
+        updateMemberIp(member.getEmail(), request.getRemoteAddr());
         // Http Header는 사용자가 수정하여 요청하는 것이 가능하다.
-        // 즉, Http Header를 신뢰할 수 있는 경우(Load Balancer를 구성했을 때) Header의 값을 가져올 수 있다.
+        // 따라서 Http Header를 신뢰할 수 있는 경우(Load Balancer를 구성했을 때) Header의 값을 가져올 수 있다.
         return member;
     }
 
-    // 로그인 사용자의 Ip주소를 가져오는 메서드
-//    private String getClientIp(){
-//        String xForwardedFor = request.getHeader("X-Forwarded-For");
-//        if(xForwardedFor == null || xForwardedFor.isEmpty()){
-//            return request.getRemoteAddr();
-//        } else {
-//            return xForwardedFor.split(",")[0].trim();
-//        }
-//    }
+    public void changePassword(UpdateMemberPasswordRequest request) {
+        BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
+        if(!isOauthUser()){
+            Member member = findByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
+//            if(member.getPassword().equals(bCryptPasswordEncoder.encode(request.getExistingPassword()))){
+            if(bCryptPasswordEncoder.matches(request.getExistingPassword() ,member.getPassword())){
+                memberRepository.save(member.updatePassword(request.getNewPassword()));
+            }
+            else {
+                throw new InvalidPasswordException("기존 비밀번호가 일치하지 않습니다.");
+            }
+        }
+        throw new IllegalStateException("올바르지 않은 접근입니다.");
+    }
     // 마지막 접속 ip 저장 메서드
     private void updateMemberIp(String email, String ip){
         Optional<Member> optionalMember = memberRepository.findByEmail(email);
@@ -78,26 +89,52 @@ public class MemberService {
             memberRepository.save(member);
         });
     }
-
-    //
-    public Member getMemberById(Long memberId){
-        if (memberId == null) return null;
-        Optional<Member> optionalMember = memberRepository.findById(memberId);
-        return optionalMember.orElse(null);
-    }
-
-    public Member getMemberByEmail(String email){
-        Optional<Member> optionalMember = memberRepository.findByEmail(email);
-        return optionalMember.orElse(null);
-    }
     public Member findByEmail(String email){
         return memberRepository.findByEmail(email)
-                .orElseThrow(()-> new IllegalArgumentException("Unexpected user"));
+                .orElseThrow(()-> new IllegalArgumentException("Unexpected member"));
     }
-
     public Member findByMemberId(Long memberId){
         return memberRepository.findById(memberId)
                 .orElseThrow(()-> new IllegalArgumentException("Unexpected member"));
     }
+    public void changeNickname(UpdateMemberNicknameRequest request){
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (email == null){
+            throw new UsernameNotFoundException("로그인한 사용자만 닉네임을 변경 할 수 있습니다.");
+        }
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(()-> new IllegalArgumentException("변경할 회원의 정보가 존재하지않습니다."));
+        member.update(request.getNewNickname());
+        memberRepository.save(member);
+    }
 
+    public MemberDataResponse getMyData() {
+        String requestMemberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        if(requestMemberEmail==null){
+            throw new UsernameNotFoundException("로그인한 사용자만 회원정보를 조회할 수 있습니다.");
+        }
+        Member member = memberRepository.findByEmail(requestMemberEmail).orElseThrow(()->
+                new IllegalArgumentException("가져올 회원정보가 존재하지않습니다."));
+        return new MemberDataResponse(member, isOauthUser());
+    }
+
+    public boolean isOauthUser(){
+        Collection<? extends GrantedAuthority> authorities =
+            SecurityContextHolder.getContext().getAuthentication().getAuthorities();
+        for (GrantedAuthority authority : authorities) {
+            if (authority.getAuthority().equals(Role.OAUTH2_MEMBER.getKey())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void logout() {
+        Member member = memberRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName())
+                .orElseThrow(()-> new UsernameNotFoundException("등록된 사용자가 아닙니다."));
+        RefreshToken refreshToken = refreshTokenRepository.findByMemberId(member.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Refresh Token을 찾을 수 없습니다."));
+        refreshToken.updateLogoutStatus();
+        refreshTokenRepository.save(refreshToken);
+    }
 }

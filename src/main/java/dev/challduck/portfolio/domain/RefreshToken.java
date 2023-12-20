@@ -18,7 +18,7 @@ public class RefreshToken {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @Column(name = "refresh_token", nullable = false)
+    @Column(name = "refresh_token", nullable = false, length = 1000)
     private String refreshToken;
 
     public RefreshToken(Member member,String refreshToken){
@@ -29,5 +29,9 @@ public class RefreshToken {
     public RefreshToken update(String newRefreshToken){
         this.refreshToken = newRefreshToken;
         return this;
+    }
+
+    public void updateLogoutStatus() {
+        this.refreshToken = "logout member";
     }
 }

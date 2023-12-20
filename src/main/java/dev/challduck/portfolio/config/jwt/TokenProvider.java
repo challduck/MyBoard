@@ -9,13 +9,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -31,17 +31,22 @@ public class TokenProvider {
 
     public String makeToken(Date expiry, Member member) {
         Date now = new Date();
-        log.info("secret Key : {}", jwtProperties.getSecretKey());
+
+        Collection<? extends GrantedAuthority> authorities = member.getAuthorities();
+        List<String> authorityStrings = authorities.stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList();
+
         return Jwts.builder()
                 .setHeaderParam(Header.TYPE, Header.JWT_TYPE) // 헤더 typ : JWT
                 // 내용 iss : properties에서 설정한 issure 값
-                .setIssuer(jwtProperties.getIssure())
+                .setIssuer(jwtProperties.getIssuer())
                 .setIssuedAt(now) // 내용 iat : 현재 시간
                 .setExpiration(expiry) // 내용 exp : expiry 멤버 변수값
                 .setSubject(member.getEmail()) // 내용 sub : 유저의 이메일
                 .claim("id", member.getId()) // 클레임 id : 유저 ID
                 // 서명 : seceretKey와 함께 HS256 알고리즘으로 암호화
-
+                .claim("authorities", authorityStrings)
                 .signWith(SignatureAlgorithm.HS256, jwtProperties.getSecretKey())
                 .compact();
     }
@@ -58,21 +63,24 @@ public class TokenProvider {
         }
     }
 
-    // token 기반으로 인증 정보를 가져오는 메서드
-    /*
-    * token을 받아 인증 정보를 담은 객체 Authentication을 받는 메서드이다.
-    * properties 파일에 저장한 secret 값으로 토큰을 복호화한 뒤
-    * claim을 가져오는 private 메서드인 getClaims()를 호출해서
-    * claim 정보를 반환받아 사용자 이메일이 들어있는 token 제목 sub와 token기반으로 인증 정보를 생성한다.
-    * 이떄 UsernamePassword~~~~ 의 첫 인자로 들어가는 User는 프로젝트에서 만든 User가 아니라 spring security에서 제공하는 객체인
-    * User 클래스를 import 해야한다.
-    *
-    */
     public Authentication getAuthentication(String token){
         Claims claims = getClaims(token);
-        Set<SimpleGrantedAuthority> authorities = Collections.singleton(new SimpleGrantedAuthority("ROLE_USER"));
+        Collection<? extends GrantedAuthority> authorities = extractAuthorities(claims);
 
-        return new UsernamePasswordAuthenticationToken(new org.springframework.security.core.userdetails.User(claims.getSubject(),"",authorities), token, authorities);
+        return new UsernamePasswordAuthenticationToken(
+                new org.springframework.security.core.userdetails.User(claims.getSubject(),"",authorities), token, authorities);
+    }
+
+    // claim에 등록된 authorities 가져오기
+    private Collection<? extends GrantedAuthority> extractAuthorities (Claims claims){
+        List<String> authorities = claims.get("authorities", List.class);
+        if(authorities == null){
+            return Collections.emptyList();
+        }
+        return authorities.stream()
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
+
     }
 
     // token 기반으로 member id를 가져오는 메서드

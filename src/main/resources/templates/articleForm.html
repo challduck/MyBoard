@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>블로그 글</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+</head>
+<body>
+<th:block th:replace="layout/header.html :: header"></th:block>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <article>
+                <!--    아이디 정보 저장    -->
+                <input type="hidden" id="article-id">
+
+                <header class="mb-4">
+                    <input type="text" class="form-control" placeholder="제목" id="article-title">
+                </header>
+                <section class="mb-5">
+                    <textarea class="form-control h-25" rows="10" placeholder="내용" id="article-content"></textarea>
+                </section>
+                <button type="button" id="article-modify-btn" class="btn btn-primary btn-sm">수정</button>
+                <button type="button" id="article-modify-btn-cancel" onclick="history.go(-1)" class="btn btn-secondary btn-sm">취소</button>
+                <button type="button" id="article-create-btn" class="btn btn-primary btn-sm">등록</button>
+            </article>
+        </div>
+    </div>
+</div>
+
+<script src="/js/article.js"></script>
+<script src="/js/util.js"></script>
+<script>
+    let articleIdNum = getNewArticleUrlPath();
+    if(articleIdNum !== null){
+        let articleCreateBtn = document.getElementById('article-create-btn');
+        articleCreateBtn.style.display = 'none';
+        fetch(`/api/articles/${articleIdNum}`, {
+            method: "GET"
+        })
+            .then(response => response.json())
+            .then(data =>{
+                let articleId = document.getElementById('article-id');
+                let articleTitle = document.getElementById('article-title');
+                let articleContent = document.getElementById('article-content');
+
+                // articleId.value = data.id;
+                articleTitle.value = data.title;
+                articleContent.value = data.content;
+                articleEdit(articleIdNum);
+            })
+    }
+    else {
+        let articleModifyBtnCancel = document.getElementById('article-modify-btn-cancel');
+        let articleModifyBtn = document.getElementById('article-modify-btn');
+        articleModifyBtn.style.display = 'none';
+        articleModifyBtnCancel.style.display = 'none';
+    }
+</script>
+</body>

@@ -20,12 +20,12 @@ public class TokenService {
     private final MemberService memberService;
 
     public String createNewAccessToken(String refreshToken){
+
         if(!tokenProvider.validToken(refreshToken)){
             throw new IllegalArgumentException("Unexpected member");
         }
+
         Long memberId = refreshTokenService.processRefreshToken(refreshToken);
-//        log.info("getMemberId firstMethod : {}", refreshTokenService.findByRefreshToken(refreshToken).getMember());
-//        log.info("getMemberId secondMethod : {}", refreshTokenService.findByRefreshToken(refreshToken).getMember().getId());
         Member member = memberService.findByMemberId(memberId);
 
         return tokenProvider.generateToken(member, Duration.ofHours(2));

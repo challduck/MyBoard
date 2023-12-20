@@ -7,6 +7,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -16,10 +17,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Table(name = "member")
 @Entity
 @Getter
@@ -36,7 +39,7 @@ public class Member implements UserDetails {
     private String email;
 
     @NotNull
-    @Column(name = "nickname", unique = true)
+    @Column(name = "nickname")
     private String nickname;
 
     @Column(name = "password")
@@ -62,29 +65,26 @@ public class Member implements UserDetails {
     private String lastLoginIp;
 
     @Builder
-    public Member(String email, String password, String nickname){
+    public Member(String email, String password, String nickname, Set<Role> roles){
         this.email = email;
         this.password = password;
         this.nickname = nickname;
+        this.roles = roles;
     }
 
     public void setLastIpAddress(String lastLoginIp) {
         this.lastLoginIp = lastLoginIp;
     }
 
-//    @Builder
-//    public Member(String email, String password){
-//        this.email = email;
-//        this.password = password;
-//    }
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
 
-        //        return List.of(new SimpleGrantedAuthority("user"));
-        return getRoles().stream()
+        Collection<? extends GrantedAuthority> authorities = getRoles().stream()
                 .map(role -> new SimpleGrantedAuthority(role.getKey()))
                 .collect(Collectors.toSet());
+
+        log.info("authorities : {}", authorities);
+        return authorities;
     }
 
     @Override
@@ -119,6 +119,11 @@ public class Member implements UserDetails {
     public boolean isEnabled() {
         // 계정이 사용 가능한지 확인하는 로직
         return true;
+    }
+
+    public Member updatePassword(String password) {
+        this.password = password;
+        return this;
     }
 
     public Member update(String name) {

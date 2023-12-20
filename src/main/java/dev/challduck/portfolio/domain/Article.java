@@ -1,5 +1,7 @@
 package dev.challduck.portfolio.domain;
 
+import dev.challduck.portfolio.dto.article.UpdateArticleRequest;
+import dev.challduck.portfolio.dto.comment.UpdateCommentRequest;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
@@ -11,6 +13,8 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -46,6 +50,9 @@ public class Article {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @OneToMany(mappedBy = "articleId", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
+
     @Builder
     public Article(Member member, String title, String content){
         this.member = member;
@@ -53,9 +60,9 @@ public class Article {
         this.content = content;
     }
 
-    public void update(String title, String content){
-        this.title = title;
-        this.content = content;
+    public void update(UpdateArticleRequest request) {
+        this.title = request.getTitle();
+        this.content = request.getContent();
     }
 
     public void setHitCount(Long hitCount) {

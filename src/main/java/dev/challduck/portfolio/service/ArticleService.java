@@ -24,10 +24,12 @@ public class ArticleService {
         return articleRepository.findAllByOrderByArticleIdDesc();
     }
 
-//    public List<Article> findByArticleId(Long id){return articleRepository.findByArticleId(id);}
-
     public Article save(AddArticleRequest request, Member member) {
-        return articleRepository.save(request.toEntity(member));
+        return articleRepository.save(Article.builder()
+                        .title(request.getTitle())
+                        .content(request.getContent())
+                        .member(member)
+                .build());
     }
 
     // 게시글 상세 조회
@@ -68,7 +70,8 @@ public class ArticleService {
     public Article update(Long id, UpdateArticleRequest request) {
         Article article = articleRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("not found : "+ id));
         authorizeArticleAuthor(article);
-        article.update(request.getTitle(), request.getContent());
+        article.update(request);
+        articleRepository.save(article);
         return article;
     }
 

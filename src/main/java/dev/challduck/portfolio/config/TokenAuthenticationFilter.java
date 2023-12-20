@@ -38,8 +38,6 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
     private String getAccessToken(String authorizationHeader) {
         if(authorizationHeader != null && authorizationHeader.startsWith(TOKEN_PREFIX)){
-            log.info(""+authorizationHeader.startsWith(TOKEN_PREFIX));
-            log.info("accessToken : {}", authorizationHeader.substring(TOKEN_PREFIX.length()) + " // 문자열 끝임");
             return authorizationHeader.substring(TOKEN_PREFIX.length());
         }
         return null;

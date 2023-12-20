@@ -11,16 +11,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -38,14 +34,10 @@ public class WebOAuthSecurityConfig {
     private final TokenProvider tokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
     private final MemberService memberService;
-
-    private final UserDetailsService userDetailsService;
-
     @Bean
     public WebSecurityCustomizer configure(){
         return (web)->web.ignoring()
                 .requestMatchers(toH2Console())
-//                .requestMatchers(antMatcher("/static/**"));
                 .requestMatchers(antMatcher("/img/**"),antMatcher("/css/**"),antMatcher("/js/**"));
     }
 
@@ -63,43 +55,61 @@ public class WebOAuthSecurityConfig {
 
         http
                 .authorizeHttpRequests((request)->request // 인증, 인가 설정
+                        .requestMatchers(antMatcher("/admin")).hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(antMatcher("/member")).hasAnyAuthority("ROLE_MEMBER", "ROLE_ADMIN")
                         // TODO: Project Build 할 때 인가 활성화 하기
-//                        .requestMatchers(antMatcher("/api/token"),antMatcher("/api/user/signin"),antMatcher("/api/user/signup"))
-//                        .permitAll()
+                        .requestMatchers(antMatcher("/api/token"),antMatcher("/api/user/login"),antMatcher("/api/user/signup"))
+                        .permitAll()
 //                        .requestMatchers(antMatcher("/api/articles/**"))
 //                        .authenticated()
                         .anyRequest()
                         .permitAll());
 
         http
-                .oauth2Login((login)->login.loginPage("/signin")
-                .authorizationEndpoint(endPoint -> endPoint
+                .oauth2Login((login)->login
+                    .loginPage("/signup")
+                    .authorizationEndpoint(endPoint -> endPoint
                         .authorizationRequestRepository(oAuth2AuthorizationRequestBasedOnCookieRepository()))
-                        .successHandler(oAuth2SuccessHandler())
-                        .userInfoEndpoint((endPoint)->endPoint.userService(oAuth2UserCustomService)));
+                    .successHandler(oAuth2SuccessHandler())
+                    .userInfoEndpoint((endPoint)->endPoint.userService(oAuth2UserCustomService)));
 
         http
                 .exceptionHandling((handling)->handling
-                        .defaultAuthenticationEntryPointFor(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED), new AntPathRequestMatcher("/api/**")));
+                    .defaultAuthenticationEntryPointFor(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED), new AntPathRequestMatcher("/api/**")));
 
         return http.build();
     }
 
-
     @Bean
     public AuthenticationManager authenticationManager(
             HttpSecurity http,
-            BCryptPasswordEncoder bCryptPasswordEncoder,
-            UserDetailsService userDetailsService) {
+            BCryptPasswordEncoder bCryptPasswordEncoder) {
 
         return http
-                .authenticationProvider(authenticationProvider(bCryptPasswordEncoder, userDetailsService))
+                .authenticationProvider(authenticationProvider(bCryptPasswordEncoder))
                 .getSharedObject(AuthenticationManager.class);
     }
 
-    private DaoAuthenticationProvider authenticationProvider(BCryptPasswordEncoder bCryptPasswordEncoder,UserDetailsService userDetailsService) {
+//    token 방식의 login 방식이므로 UserDetailsService에 대한 내용은 존재하지않는다. 필요한 정보는 Token에서 추출해서 사용한다.
+//    @Bean
+//    public AuthenticationManager authenticationManager(
+//            HttpSecurity http,
+//            BCryptPasswordEncoder bCryptPasswordEncoder,
+//            UserDetailsService userDetailsService) {
+//
+//        return http
+//                .authenticationProvider(authenticationProvider(bCryptPasswordEncoder, userDetailsService))
+//                .getSharedObject(AuthenticationManager.class);
+//    }
+//    private DaoAuthenticationProvider authenticationProvider(BCryptPasswordEncoder bCryptPasswordEncoder,UserDetailsService userDetailsService) {
+//        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+//        provider.setUserDetailsService(userDetailsService);
+//        provider.setPasswordEncoder(bCryptPasswordEncoder);
+//        return provider;
+//    }
+
+    private DaoAuthenticationProvider authenticationProvider(BCryptPasswordEncoder bCryptPasswordEncoder) {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userDetailsService);
         provider.setPasswordEncoder(bCryptPasswordEncoder);
         return provider;
     }
