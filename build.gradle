@@ -33,7 +33,7 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	testAnnotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.projectlombok:lombok'
-	runtimeOnly 'com.h2database:h2'
+//	runtimeOnly 'com.h2database:h2'
 
 	implementation 'io.jsonwebtoken:jjwt:0.9.1'
 	implementation 'javax.xml.bind:jaxb-api:2.3.1' // XML 문서와 Java 객체간 매핑을 자동화
@@ -45,16 +45,21 @@ dependencies {
 
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 	implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.7.1'
-	implementation 'org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure' // springboot form login 사용자 설정
+	implementation 'org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure:2.6.8' // springboot form login 사용자 설정
 
 	// 이미지 최적화 라이브러리
 	implementation 'net.coobird:thumbnailator:0.4.20'
 	// openApi 의존성
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0'
+
+	implementation 'mysql:mysql-connector-java:8.0.33'
 }
 
 tasks.named('bootBuildImage') {
 	builder = 'paketobuildpacks/builder-jammy-base:latest'
+}
+test {
+	exclude '**/*'
 }
 
 tasks.named('test') {

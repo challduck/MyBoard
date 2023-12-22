@@ -46,8 +46,12 @@ function changePassword (){
             existingPassword:oldPasswordValue,
             newPassword:newPasswordValue
         });
-        // TODO:로그아웃 로직 구현한거 여기다 넣기
-        function success(){alert("비밀번호 변경 성공.\n다시 로그인 해주세요."); window.location.reload();}
+        function success(){
+            alert("비밀번호 변경 성공.\n다시 로그인 해주세요.");
+            document.cookie = "refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            localStorage.removeItem("access_token");
+            window.location.reload();
+        }
         function fail(error){alert("잘못된 접근입니다.\n다시 로그인하여 시도해주세요." + error)}
 
         httpRequest('POST', '/api/user/new-password', body, success, fail);

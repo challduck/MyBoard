@@ -7,6 +7,7 @@ import dev.challduck.portfolio.service.ArticleService;
 import dev.challduck.portfolio.service.CommentService;
 import dev.challduck.portfolio.service.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,7 +34,7 @@ public class CommentApiController {
     @ApiResponse(responseCode = "200",description = "댓글 목록 조회 성공하였습니다.")
     @ApiResponse(responseCode = "400",description = "가져올 댓글의 목록이 존재하지않습니다.")
     @GetMapping("/articles/{id}/comments")
-    public ResponseEntity<List<CommentViewResponse>> comments(@PathVariable Long id){
+    public ResponseEntity<List<CommentViewResponse>> comments(@PathVariable @Parameter(description = "댓글을 조회할 게시글 Id", example = "4") Long id){
         Article article = articleService.findById(id);
         List<CommentViewResponse> commentViewResponse = commentService.comments(article);
 
@@ -46,7 +47,7 @@ public class CommentApiController {
     @ApiResponse(responseCode = "400",description = "댓글을 작성할 게시글이 존재하지않습니다.")
     @PostMapping("/articles/{id}/comments")
     public ResponseEntity<AddCommentResponse> create(
-            @PathVariable Long id,
+            @PathVariable @Parameter(description = "댓글을 작성할 게시글 Id", example = "4") Long id,
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody AddCommentRequest request){
 
@@ -64,7 +65,7 @@ public class CommentApiController {
     @ApiResponse(responseCode = "400",description = "댓글을 수정할 게시글이 존재하지않습니다.")
     @ApiResponse(responseCode = "401",description = "본인이 작성한 댓글만 수정 가능합니다.")
     @PutMapping("/comments/{id}")
-    public ResponseEntity<UpdateCommentResponse> update(@PathVariable Long id,
+    public ResponseEntity<UpdateCommentResponse> update(@PathVariable @Parameter(description = "댓글을 수정할 댓글 Id", example = "10") Long id,
                                                         @RequestBody UpdateCommentRequest request){
         UpdateCommentResponse update =  commentService.update(id, request);
 
@@ -77,7 +78,7 @@ public class CommentApiController {
     @ApiResponse(responseCode = "400",description = "댓글을 수정할 게시글이 존재하지않습니다.")
     @ApiResponse(responseCode = "401",description = "본인이 작성한 댓글만 삭제 가능합니다.")
     @DeleteMapping("/comments/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id){
+    public ResponseEntity<Void> delete(@PathVariable @Parameter(description = "댓글을 삭제할 댓글 Id", example = "10") Long id){
         commentService.delete(id);
         return ResponseEntity.ok().build();
     }

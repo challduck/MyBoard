@@ -18,7 +18,10 @@ public class ArticleLikeService {
     private final ArticleLikeRepository articleLikeRepository;
 
     public ArticleLikeViewResponse getArticleLike(Article article){
-        return new ArticleLikeViewResponse(articleLikeRepository.countByArticleId(article));
+        if(article==null){
+            return new ArticleLikeViewResponse(articleLikeRepository.countByArticleId(article));
+        }
+        return new ArticleLikeViewResponse(0L);
     }
 
     @Transactional

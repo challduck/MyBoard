@@ -173,7 +173,6 @@ const createButton = document.getElementById('article-create-btn');
 
 if (createButton) {
     createButton.addEventListener('click', event => {
-        alert('click')
         let body = JSON.stringify({
             title: document.getElementById('article-title').value,
             content: document.getElementById('article-content').value

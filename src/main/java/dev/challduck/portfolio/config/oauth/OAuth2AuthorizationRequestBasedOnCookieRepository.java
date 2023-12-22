@@ -30,7 +30,6 @@ public class OAuth2AuthorizationRequestBasedOnCookieRepository implements Author
             removeAuthorizationRequest(request ,response);
             return;
         }
-        log.info("쿠키 저장?");
         CookieUtil.addCookie(response, OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME, CookieUtil.serialize(authorizationRequest), COOKIE_EXPIRE_SECONDS);
     }
 

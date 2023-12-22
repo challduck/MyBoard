@@ -45,14 +45,16 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
             log.info("registartionId : {}" , registrationId);
 
-            if(registrationId.equals("google")){
-                email = (String) oAuth2User.getAttributes().get("email");
-            } else if (registrationId.equals("kakao")) {
-                Map<String, Object> kakaoAccount = (Map<String, Object>) oAuth2User.getAttributes().get("kakao_account");
-                email = (String) kakaoAccount.get("email");
-            } else if(registrationId.equals("naver")){
-                Map<String, Object> naverAccount = (Map<String, Object>) oAuth2User.getAttributes().get("response");
-                email = (String) naverAccount.get("email");
+            switch (registrationId) {
+                case "google" -> email = (String) oAuth2User.getAttributes().get("email");
+                case "kakao" -> {
+                    Map<String, Object> kakaoAccount = (Map<String, Object>) oAuth2User.getAttributes().get("kakao_account");
+                    email = (String) kakaoAccount.get("email");
+                }
+                case "naver" -> {
+                    Map<String, Object> naverAccount = (Map<String, Object>) oAuth2User.getAttributes().get("response");
+                    email = (String) naverAccount.get("email");
+                }
             }
 
             Member member = userService.findByEmail(email);

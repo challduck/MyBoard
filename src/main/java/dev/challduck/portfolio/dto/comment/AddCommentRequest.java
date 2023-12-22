@@ -5,7 +5,9 @@ import dev.challduck.portfolio.domain.Comment;
 import dev.challduck.portfolio.domain.Member;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
+import lombok.Setter;
 
+@Setter
 @Getter
 public class AddCommentRequest {
     private Member member;

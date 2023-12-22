@@ -73,11 +73,13 @@ public class ArticleApiController {
     @ApiResponse(responseCode = "200",description = "게시글 상세 조회 성공하였습니다.", content = @Content(schema = @Schema(implementation = ArticleViewResponse.class)))
     @ApiResponse(responseCode = "400",description = "조회할 게시글이 존재하지 않음.")
     @GetMapping("/articles/{id}")
-    public ResponseEntity<ArticleViewResponse> findArticle(@PathVariable @Parameter(description = "조회할 게시글 Id", example = "1") Long id, HttpServletRequest request){
+    public ResponseEntity<ArticleViewResponse> findArticle(
+            @PathVariable @Parameter(description = "조회할 게시글 Id", example = "1") Long id,
+            @RequestHeader(value = "X-Forwarded-For", defaultValue = "") String xForwardedFor){
         try{
             Article article = articleService.findById(id);
-            articleService.increaseHitCount(request.getRemoteAddr(), id);
-
+            String clientIp = xForwardedFor != null ? xForwardedFor.split(",")[0].trim() : "Unknown";
+            articleService.increaseHitCount(clientIp, id);
             return ResponseEntity.ok().body(new ArticleViewResponse(article));
 
         } catch (Exception e){

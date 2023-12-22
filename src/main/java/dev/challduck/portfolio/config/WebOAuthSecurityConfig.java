@@ -37,7 +37,7 @@ public class WebOAuthSecurityConfig {
     @Bean
     public WebSecurityCustomizer configure(){
         return (web)->web.ignoring()
-                .requestMatchers(toH2Console())
+//                .requestMatchers(toH2Console())
                 .requestMatchers(antMatcher("/img/**"),antMatcher("/css/**"),antMatcher("/js/**"));
     }
 
@@ -55,13 +55,12 @@ public class WebOAuthSecurityConfig {
 
         http
                 .authorizeHttpRequests((request)->request // 인증, 인가 설정
-                        .requestMatchers(antMatcher("/admin")).hasAuthority("ROLE_ADMIN")
-                        .requestMatchers(antMatcher("/member")).hasAnyAuthority("ROLE_MEMBER", "ROLE_ADMIN")
-                        // TODO: Project Build 할 때 인가 활성화 하기
+                        .requestMatchers(antMatcher("/api/user/my-page"),antMatcher("/api/user/new-nickname"))
+                            .hasAnyAuthority("ROLE_OAUTH2_MEMBER","ROLE_MEMBER", "ROLE_ADMIN")
+                        .requestMatchers(antMatcher("/api/user/new-password"))
+                            .hasAnyAuthority("ROLE_MEMBER", "ROLE_ADMIN")
                         .requestMatchers(antMatcher("/api/token"),antMatcher("/api/user/login"),antMatcher("/api/user/signup"))
                         .permitAll()
-//                        .requestMatchers(antMatcher("/api/articles/**"))
-//                        .authenticated()
                         .anyRequest()
                         .permitAll());
 
@@ -89,24 +88,6 @@ public class WebOAuthSecurityConfig {
                 .authenticationProvider(authenticationProvider(bCryptPasswordEncoder))
                 .getSharedObject(AuthenticationManager.class);
     }
-
-//    token 방식의 login 방식이므로 UserDetailsService에 대한 내용은 존재하지않는다. 필요한 정보는 Token에서 추출해서 사용한다.
-//    @Bean
-//    public AuthenticationManager authenticationManager(
-//            HttpSecurity http,
-//            BCryptPasswordEncoder bCryptPasswordEncoder,
-//            UserDetailsService userDetailsService) {
-//
-//        return http
-//                .authenticationProvider(authenticationProvider(bCryptPasswordEncoder, userDetailsService))
-//                .getSharedObject(AuthenticationManager.class);
-//    }
-//    private DaoAuthenticationProvider authenticationProvider(BCryptPasswordEncoder bCryptPasswordEncoder,UserDetailsService userDetailsService) {
-//        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-//        provider.setUserDetailsService(userDetailsService);
-//        provider.setPasswordEncoder(bCryptPasswordEncoder);
-//        return provider;
-//    }
 
     private DaoAuthenticationProvider authenticationProvider(BCryptPasswordEncoder bCryptPasswordEncoder) {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();

@@ -58,21 +58,6 @@ public class OAuth2UserCustomService extends DefaultOAuth2UserService {
         return memberRepository.save(member);
     }
 
-    // TODO: 메서드의 사용목적을 명확히 하기
-//    private Member saveOrUpdate(OAuth2User user) {
-//        Map<String, Object> attributes = user.getAttributes();
-//        String email = (String) attributes.get("email");
-//        String name = (String) attributes.get("name");
-//        Member member = memberRepository.findByEmail(email)
-//                .map((entity)-> entity.update(name))
-//                .orElse(Member.builder()
-//                        .email(email)
-//                        .nickname(name)
-//                        .roles(Collections.singleton(Role.OAUTH2_MEMBER))
-//                        .build());
-//        return memberRepository.save(member);
-//    }
-
     private void handleGoogleUser(OAuth2User oAuth2User) {
         Map<String, Object> attributes = oAuth2User.getAttributes();
         String email = (String) attributes.get("email");

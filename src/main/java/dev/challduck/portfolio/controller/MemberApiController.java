@@ -60,7 +60,7 @@ public class MemberApiController {
     public ResponseEntity<String> signIn(@RequestBody SignInMemberRequest dto, HttpServletResponse response, HttpServletRequest request){
 
         try {
-            Member member = memberService.signIn(dto);
+            Member member = memberService.signIn(dto, request);
             // token 발급하는 부분
             String refreshToken = refreshTokenService.loginSuccessMemberGenerateRefreshToken(member);
             String accessToken = refreshTokenService.loginSuccessMemberGenerateAccessToken(member);

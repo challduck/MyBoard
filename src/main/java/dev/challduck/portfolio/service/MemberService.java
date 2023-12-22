@@ -49,7 +49,7 @@ public class MemberService {
     }
 
     // 로그인
-    public Member signIn(SignInMemberRequest dto) {
+    public Member signIn(SignInMemberRequest dto, HttpServletRequest request) {
         BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
 
         Member member = memberRepository.findByEmail(dto.getEmail())
@@ -60,8 +60,10 @@ public class MemberService {
             throw new IncorrectPasswordException("아이디 또는 비밀번호가 일치하지않습니다.");
         }
 
+        String xForwardedForHeader = request.getHeader("X-Forwarded-For");
+        String clientIp = xForwardedForHeader != null ? xForwardedForHeader.split(",")[0].trim() : "Unknown";
         // LoadBalancer 를 구성하지 않았다면 request.getRemoteAddr 메서드로 가져온다.
-        updateMemberIp(member.getEmail(), request.getRemoteAddr());
+        updateMemberIp(member.getEmail(), clientIp);
         // Http Header는 사용자가 수정하여 요청하는 것이 가능하다.
         // 따라서 Http Header를 신뢰할 수 있는 경우(Load Balancer를 구성했을 때) Header의 값을 가져올 수 있다.
         return member;
