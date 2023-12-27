@@ -55,7 +55,7 @@ jobs:
         password: ${{ secrets.SSH_SECRET }}
         script: |
           cd /home/${{ secrets.SSH_HOST_NAME }}/springboot-bbs
-          sudo docker-compose down
-          sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/springboot_bbs:${{ github.sha }}
-          sudo docker-compose up -d
-          sudo docker image prune -f
+          echo "${{ secrets.SSH_SECRET }}" | sudo -S docker-compose down
+          echo "${{ secrets.SSH_SECRET }}" | sudo -S docker pull ***/springboot_bbs:7e01de080a45f9794ec9a52b1164007822a84e0f
+          echo "${{ secrets.SSH_SECRET }}" | sudo -S docker-compose up -d
+          echo "${{ secrets.SSH_SECRET }}" | sudo -S docker image prune -f
