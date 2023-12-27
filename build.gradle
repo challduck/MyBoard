@@ -65,3 +65,7 @@ test {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+jar {
+
+}
