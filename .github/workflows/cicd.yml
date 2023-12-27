@@ -51,7 +51,8 @@ jobs:
       with:
         host: ${{ secrets.SSH_HOST }}
         port: ${{ secrets.SSH_PORT }}
-        username: ${{ secrets.SSH_SECRET }}
+        username: ${{ secrets.SSH_HOST_NAME }}
+        password: ${{ secrets.SSH_SECRET }}
         script: |
           cd /home/${{ secrets.SSH_HOST_NAME }}/springboot-bbs
           sudo docker-compose down
