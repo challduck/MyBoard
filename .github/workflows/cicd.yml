@@ -35,7 +35,7 @@ jobs:
       run: ./gradlew clean build
       
     - name: docker image build
-      run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/springboot_bbs:${{ github.sha }} .
+      run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/springboot_bbs:latest .
 
     - name: docker login
       uses: docker/login-action@v2
@@ -44,7 +44,7 @@ jobs:
         password: ${{ secrets.DOCKERHUB_PASSWORD }}
         
     - name: docker Hub push
-      run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/springboot_bbs:${{ github.sha }}
+      run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/springboot_bbs:latest
 
     - name: executing remote ssh commands using password
       uses: appleboy/ssh-action@master
@@ -56,6 +56,6 @@ jobs:
         script: |
           cd /home/${{ secrets.SSH_HOST_NAME }}/springboot-bbs
           echo "${{ secrets.SSH_SECRET }}" | sudo -S docker-compose down
-          echo "${{ secrets.SSH_SECRET }}" | sudo -S docker pull ***/springboot_bbs:7e01de080a45f9794ec9a52b1164007822a84e0f
+          echo "${{ secrets.SSH_SECRET }}" | sudo -S docker pull ${{ secrets.DOCKERHUB_USERNAME }}/springboot_bbs:latest
           echo "${{ secrets.SSH_SECRET }}" | sudo -S docker-compose up -d
           echo "${{ secrets.SSH_SECRET }}" | sudo -S docker image prune -f
