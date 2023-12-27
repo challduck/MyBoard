@@ -1,26 +1,14 @@
 # SpringBoot-Project-BBS
-스프링부트
 
-# 프로젝트 소개
+## 프로젝트 소개
+스프링부트3를 사용하여 제작한 게시판 서비스 입니다.
 
-## 구현 환경
-
-- OpenJdk 17
-- Spring Boot 3.1.5
-- Mysql 8.0.33
-- gradle
-
-## Infra
-Docker<br/>
-Nginx
-
-## Tools
-Intellij ultimate
-Git
+## 기술 스택 및 인프라
+![Project tech stack and infra](docs/project_tech_stack.png)
 
 # 프로젝트 아키텍쳐
-## 구조
-
+## 서버 구조
+![Project Server Architecture](docs/server_architecture.png)
 
 ## ERD
-![Project RED](docs/springboot_bbs.png)
+![Project ERD](docs/springboot_bbs.png)
