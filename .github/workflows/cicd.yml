@@ -47,16 +47,15 @@ jobs:
       run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/springboot_bbs:latest
 
     - name: transfer docker compose file
-      run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        eval "$(ssh-agent -s)"
-        ssh-add - <<< "${{ secrets.SSH_SECRET_PASSPHRASE }}"
-        scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -P ${{ secrets.SSH_PORT }} docker-compose.yaml ${{ secrets.SSH_HOST_NAME }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_HOST_NAME }}/springboot-bbs
-        rm -rf ~/.ssh
-      env:
-        SSH_AUTH_SOCK: /dev/null
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        port: ${{ secrets.SSH_PORT }}
+        key: ${{ secrets.SSH_SECRET_KEY }}
+        passphrase: ${{ secrets.SSH_SECRET_PASSPHRASE }}
+        username: ${{ secrets.SSH_HOST_NAME }}
+        source: "docker-compose.yaml"
+        target: "/home/${{ secrets.SSH_HOST_NAME }}/springboot-bbs"
 
     - name: executing remote ssh commands using password
       uses: appleboy/ssh-action@master
