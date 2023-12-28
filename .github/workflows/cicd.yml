@@ -42,10 +42,13 @@ jobs:
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_PASSWORD }}
-        
+
     - name: docker Hub push
       run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/springboot_bbs:latest
 
+    - name: transfer docker compose file
+      run: scp -o StrictHostKeyChecking=no docker-compose.yaml ${{ secrets.SSH_HOST_NAME }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_HOST_NAME }}/springboot-bbs
+      
     - name: executing remote ssh commands using password
       uses: appleboy/ssh-action@master
       with:

@@ -2,11 +2,12 @@ version: "3"
 services:
   springboot_bbs:
     container_name: springboot_bbs
-    image: openjdk:17-jdk
-    ports: 
-      - "8082:8082"
-    volumes: 
-      - ./springboot_bbs/workspace:/workspace
+    # image: openjdk:17-jdk
+    image: challduck/springboot_bbs
+    ports:
+      - "8082:8080"
+    # volumes:
+    #   - ./springboot_bbs/workspace:/workspace
     restart: always
     command: /bin/bash
     stdin_open: true
@@ -26,15 +27,15 @@ services:
       - SPRING_DATASOURCE_PASSWORD=${DATABASE_USER_PASSWORD}
     depends_on:
       - springboot_db
-    networks: 
+    networks:
       - web-net
       - db-net
   springboot_db:
     container_name: springboot_bbs_db
     image: mysql:8.0.33
-    ports: 
+    ports:
       - "13308:3306"
-    volumes: 
+    volumes:
       - ./db/mysql:/var/lib/mysql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     restart: always
@@ -47,7 +48,7 @@ services:
       - MYSQL_DATABASE=${DATABASE_NAME}
       - MYSQL_USER=${DATABASE_USER_NAME}
       - MYSQL_PASSWORD=${DATABASE_USER_PASSWORD}
-    networks: 
+    networks:
       - db-net
 networks:
   web-net:

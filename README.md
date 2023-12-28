@@ -10,5 +10,8 @@
 ## 서버 구조
 ![Project Server Architecture](docs/server_architecture.png)
 
+## CI/CD 파이프라인
+![Project CI/CD PipeLine](docs/CICD_PIPELINE.png)
+
 ## ERD
 ![Project ERD](docs/springboot_bbs.png)
