@@ -55,7 +55,7 @@ jobs:
         passphrase: ${{ secrets.SSH_SECRET_PASSPHRASE }}
         username: ${{ secrets.SSH_HOST_NAME }}
         source: "docker-compose.yaml"
-        target: "/home/${{ secrets.SSH_HOST_NAME }}/springboot-bbs"
+        target: "/home/${{ secrets.SSH_DIRECTORY }}/springboot-bbs"
 
     - name: executing remote ssh commands using password
       uses: appleboy/ssh-action@master
@@ -66,9 +66,9 @@ jobs:
         passphrase: ${{ secrets.SSH_SECRET_PASSPHRASE }}
         username: ${{ secrets.SSH_HOST_NAME }}
         script: |
-          cd /home/${{ secrets.SSH_HOST_NAME }}/springboot-bbs
-          sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/springboot_bbs:latest
-          sudo docker-compose down
-          sudo docker-compose up -d
-          sudo docker exec -it springboot_bbs java -jar springboot.jar
-          sudo docker image prune -f
+          cd /home/${{ secrets.SSH_DIRECTORY }}/springboot-bbs
+          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/springboot_bbs:latest
+          docker-compose down
+          docker-compose up -d
+          docker exec -it springboot_bbs java -jar springboot.jar
+          docker image prune -f
