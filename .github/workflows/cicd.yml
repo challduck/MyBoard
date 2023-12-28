@@ -47,19 +47,29 @@ jobs:
       run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/springboot_bbs:latest
 
     - name: transfer docker compose file
-      run: scp -o StrictHostKeyChecking=no -P ${{ secrets.SSH_PORT }} docker-compose.yaml ${{ secrets.SSH_HOST_NAME }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_HOST_NAME }}/springboot-bbs
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        eval "$(ssh-agent -s)"
+        ssh-add - <<< "${{ secrets.SSH_PASSPHRASE }}"
+        scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -P ${{ secrets.SSH_PORT }} docker-compose.yaml ${{ secrets.SSH_HOST_NAME }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_HOST_NAME }}/springboot-bbs
+        rm -rf ~/.ssh
+      env:
+        SSH_AUTH_SOCK: /dev/null
 
     - name: executing remote ssh commands using password
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.SSH_HOST }}
         port: ${{ secrets.SSH_PORT }}
+        key: ${{ secrets.SSH_SECRET_KEY }}
+        passphrase: ${{ secrets.SSH_SECRET_PASSPHRASE }}
         username: ${{ secrets.SSH_HOST_NAME }}
-        password: ${{ secrets.SSH_SECRET }}
         script: |
           cd /home/${{ secrets.SSH_HOST_NAME }}/springboot-bbs
-          echo "${{ secrets.SSH_SECRET }}" | sudo -S docker-compose down
-          echo "${{ secrets.SSH_SECRET }}" | sudo -S docker pull ${{ secrets.DOCKERHUB_USERNAME }}/springboot_bbs:latest
-          echo "${{ secrets.SSH_SECRET }}" | sudo -S docker-compose up -d
-          echo "${{ secrets.SSH_SECRET }}" | sudo -S docker exec -it springboot_bbs java -jar springboot.jar
-          echo "${{ secrets.SSH_SECRET }}" | sudo -S docker image prune -f
+          sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/springboot_bbs:latest
+          sudo docker-compose down
+          sudo docker-compose up -d
+          sudo docker exec -it springboot_bbs java -jar springboot.jar
+          sudo docker image prune -f
