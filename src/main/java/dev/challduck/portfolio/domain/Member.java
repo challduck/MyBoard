@@ -58,22 +58,12 @@ public class Member implements UserDetails {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @Column(name = "last_login")
-    private LocalDateTime lastLogin;
-
-    @Column(name = "last_login_ip")
-    private String lastLoginIp;
-
     @Builder
     public Member(String email, String password, String nickname, Set<Role> roles){
         this.email = email;
         this.password = password;
         this.nickname = nickname;
         this.roles = roles;
-    }
-
-    public void setLastIpAddress(String lastLoginIp) {
-        this.lastLoginIp = lastLoginIp;
     }
 
     @Override

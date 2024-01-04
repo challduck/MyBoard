@@ -5,6 +5,7 @@ import dev.challduck.portfolio.dto.member.*;
 import dev.challduck.portfolio.exception.IncorrectPasswordException;
 import dev.challduck.portfolio.exception.InvalidPasswordException;
 import dev.challduck.portfolio.exception.UserNotFoundException;
+import dev.challduck.portfolio.service.MemberLoginLogService;
 import dev.challduck.portfolio.service.MemberService;
 import dev.challduck.portfolio.service.RefreshTokenService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,6 +32,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 public class MemberApiController {
     private final MemberService memberService;
+    private final MemberLoginLogService memberLoginLogService;
     private final RefreshTokenService refreshTokenService;
 
     @Operation(summary = "회원가입")
@@ -60,7 +62,10 @@ public class MemberApiController {
     public ResponseEntity<String> signIn(@RequestBody SignInMemberRequest dto, HttpServletResponse response, HttpServletRequest request){
 
         try {
-            Member member = memberService.signIn(dto, request);
+            Member member = memberService.signIn(dto);
+
+            memberLoginLogService.memberLoginLogSave(dto.getEmail(), request);
+
             // token 발급하는 부분
             String refreshToken = refreshTokenService.loginSuccessMemberGenerateRefreshToken(member);
             String accessToken = refreshTokenService.loginSuccessMemberGenerateAccessToken(member);

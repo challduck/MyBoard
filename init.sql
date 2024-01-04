@@ -1,4 +1,5 @@
 USE springboot_bbs;
+
 CREATE TABLE member (
     member_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(255) UNIQUE NOT NULL,
@@ -6,8 +7,6 @@ CREATE TABLE member (
     password VARCHAR(255),
     created_at DATETIME,
     updated_at DATETIME,
-    last_login DATETIME,
-    last_login_ip VARCHAR(255),
     UNIQUE KEY email_UNIQUE (email)
 );
 CREATE TABLE article (
@@ -44,16 +43,23 @@ CREATE TABLE refresh_token (
     FOREIGN KEY (member_id) REFERENCES member (member_id)
 );
 CREATE TABLE member_roles (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
     member_id BIGINT,
     roles VARCHAR(255),
     FOREIGN KEY (member_id) REFERENCES member(member_id)
 );
+CREATE TABLE member_login_log (
+      member_login_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+      member_id BIGINT,
+      last_login_ip VARCHAR(255),
+      last_login DATETIME,
+      FOREIGN KEY (member_id) REFERENCES member(member_id)
+);
 
-INSERT INTO member(email, nickname, password, created_at, updated_at, last_login, last_login_ip) VALUES ('admin@admin.com', 'admin', '$2a$10$jBPH3jwS7Lw8JlxL8NcIXeweGlkUF89wG6gDFudDb8u82RGh/HbEm', NOW(), NOW(), NOW(), '192.168.0.1');
-INSERT INTO member(email, nickname, password, created_at, updated_at, last_login, last_login_ip) VALUES ('abc@a.com', 'user1', '$2a$10$jBPH3jwS7Lw8JlxL8NcIXeweGlkUF89wG6gDFudDb8u82RGh/HbEm', NOW(), NOW(), NOW(), '192.168.0.2');
-INSERT INTO member(email, nickname, password, created_at, updated_at, last_login, last_login_ip) VALUES ('abc@b.com', 'user2', '$2a$10$jBPH3jwS7Lw8JlxL8NcIXeweGlkUF89wG6gDFudDb8u82RGh/HbEm', NOW(), NOW(), NOW(), '192.168.0.3');
-INSERT INTO member(email, nickname, password, created_at, updated_at, last_login, last_login_ip) VALUES ('abc@c.com', 'user3', '$2a$10$jBPH3jwS7Lw8JlxL8NcIXeweGlkUF89wG6gDFudDb8u82RGh/HbEm', NOW(), NOW(), NOW(), '192.168.0.4');
+INSERT INTO member(email, nickname, password, created_at, updated_at) VALUES ('admin@admin.com', 'admin', '$2a$10$jBPH3jwS7Lw8JlxL8NcIXeweGlkUF89wG6gDFudDb8u82RGh/HbEm', NOW(), NOW());
+INSERT INTO member(email, nickname, password, created_at, updated_at) VALUES ('abc@a.com', 'user1', '$2a$10$jBPH3jwS7Lw8JlxL8NcIXeweGlkUF89wG6gDFudDb8u82RGh/HbEm', NOW(), NOW());
+INSERT INTO member(email, nickname, password, created_at, updated_at) VALUES ('abc@b.com', 'user2', '$2a$10$jBPH3jwS7Lw8JlxL8NcIXeweGlkUF89wG6gDFudDb8u82RGh/HbEm', NOW(), NOW());
+INSERT INTO member(email, nickname, password, created_at, updated_at) VALUES ('abc@c.com', 'user3', '$2a$10$jBPH3jwS7Lw8JlxL8NcIXeweGlkUF89wG6gDFudDb8u82RGh/HbEm', NOW(), NOW());
 
 
 INSERT INTO member_roles(member_id, roles) VALUES ((SELECT member_id FROM member WHERE email = 'admin@admin.com'), 'ADMIN');

@@ -5,11 +5,14 @@ function getMyPageData(){
             let memberId = document.getElementById('member-id');
             let memberNickname = document.getElementById('member-nickname');
             let memberCreatedAt = document.getElementById('member-created-at');
+            let memberLastLoginIp = document.getElementById('member-last-login-ip');
+            let memberLastLoginDate = document.getElementById('member-last-login-date');
             console.log(data);
             memberId.textContent = data.email;
             memberNickname.textContent = data.nickname;
             memberCreatedAt.textContent = formatDate(new Date(data.createdAt));
-
+            memberLastLoginIp.textContent = data.loginIp;
+            memberLastLoginDate.textContent = formatDate(new Date(data.loginDate));
             if(data.oauth){
                 const changePasswordBtnBox = document.getElementById("changePasswordBtnBox");
                 changePasswordBtnBox.style.display = "none";

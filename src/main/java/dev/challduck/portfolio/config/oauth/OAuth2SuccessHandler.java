@@ -4,8 +4,10 @@ import dev.challduck.portfolio.config.jwt.TokenProvider;
 import dev.challduck.portfolio.domain.Member;
 import dev.challduck.portfolio.domain.RefreshToken;
 import dev.challduck.portfolio.repository.RefreshTokenRepository;
+import dev.challduck.portfolio.service.MemberLoginLogService;
 import dev.challduck.portfolio.service.MemberService;
 import dev.challduck.portfolio.util.CookieUtil;
+import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +36,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private final RefreshTokenRepository refreshTokenRepository;
     private final OAuth2AuthorizationRequestBasedOnCookieRepository authorizationRequestRepository;
     private final MemberService userService;
-
+    private final MemberLoginLogService memberLoginLogService;
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
 
@@ -43,7 +45,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
             String email = null;
 
-            log.info("registartionId : {}" , registrationId);
+            log.info("registrationId : {}" , registrationId);
 
             switch (registrationId) {
                 case "google" -> email = (String) oAuth2User.getAttributes().get("email");
@@ -58,6 +60,8 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             }
 
             Member member = userService.findByEmail(email);
+            log.info("memberData : {}", member.getEmail());
+            memberLoginLogService.memberLoginLogSave(email, request);
 
             String refreshToken= tokenProvider.generateToken(member, REFRESH_TOKEN_DURATION);
             saveRefreshToken(member, refreshToken);

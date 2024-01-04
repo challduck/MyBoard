@@ -4,8 +4,11 @@ import dev.challduck.portfolio.config.jwt.TokenProvider;
 import dev.challduck.portfolio.config.oauth.OAuth2AuthorizationRequestBasedOnCookieRepository;
 import dev.challduck.portfolio.config.oauth.OAuth2SuccessHandler;
 import dev.challduck.portfolio.config.oauth.OAuth2UserCustomService;
+import dev.challduck.portfolio.repository.MemberLoginLogRepository;
 import dev.challduck.portfolio.repository.RefreshTokenRepository;
+import dev.challduck.portfolio.service.MemberLoginLogService;
 import dev.challduck.portfolio.service.MemberService;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,6 +37,7 @@ public class WebOAuthSecurityConfig {
     private final TokenProvider tokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
     private final MemberService memberService;
+    private final MemberLoginLogService memberLoginLogService;
     @Bean
     public WebSecurityCustomizer configure(){
         return (web)->web.ignoring()
@@ -102,8 +106,9 @@ public class WebOAuthSecurityConfig {
 
     @Bean
     public OAuth2SuccessHandler oAuth2SuccessHandler(){
-        return new OAuth2SuccessHandler(tokenProvider, refreshTokenRepository, oAuth2AuthorizationRequestBasedOnCookieRepository(),memberService);
+        return new OAuth2SuccessHandler(tokenProvider, refreshTokenRepository, oAuth2AuthorizationRequestBasedOnCookieRepository(),memberService, memberLoginLogService);
     }
+
 
     @Bean
     public OAuth2AuthorizationRequestBasedOnCookieRepository oAuth2AuthorizationRequestBasedOnCookieRepository(){

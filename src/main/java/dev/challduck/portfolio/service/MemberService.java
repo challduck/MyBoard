@@ -1,6 +1,7 @@
 package dev.challduck.portfolio.service;
 
 import dev.challduck.portfolio.domain.Member;
+import dev.challduck.portfolio.domain.MemberLoginLog;
 import dev.challduck.portfolio.domain.RefreshToken;
 import dev.challduck.portfolio.dto.member.*;
 import dev.challduck.portfolio.exception.IncorrectPasswordException;
@@ -31,7 +32,7 @@ import java.util.Optional;
 public class MemberService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final MemberRepository memberRepository;
-    private final HttpServletRequest request;
+    private final MemberLoginLogService memberLoginLogService;
 
     // 회원가입
     public Member saveMember(AddMemberRequest dto) {
@@ -49,7 +50,7 @@ public class MemberService {
     }
 
     // 로그인
-    public Member signIn(SignInMemberRequest dto, HttpServletRequest request) {
+    public Member signIn(SignInMemberRequest dto) {
         BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
 
         Member member = memberRepository.findByEmail(dto.getEmail())
@@ -59,13 +60,6 @@ public class MemberService {
         if(!bCryptPasswordEncoder.matches(dto.getPassword(), member.getPassword())){
             throw new IncorrectPasswordException("아이디 또는 비밀번호가 일치하지않습니다.");
         }
-
-        String xForwardedForHeader = request.getHeader("X-Forwarded-For");
-        String clientIp = xForwardedForHeader != null ? xForwardedForHeader.split(",")[0].trim() : "Unknown";
-        // LoadBalancer 를 구성하지 않았다면 request.getRemoteAddr 메서드로 가져온다.
-        updateMemberIp(member.getEmail(), clientIp);
-        // Http Header는 사용자가 수정하여 요청하는 것이 가능하다.
-        // 따라서 Http Header를 신뢰할 수 있는 경우(Load Balancer를 구성했을 때) Header의 값을 가져올 수 있다.
         return member;
     }
 
@@ -73,7 +67,6 @@ public class MemberService {
         BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
         if(!isOauthUser()){
             Member member = findByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
-//            if(member.getPassword().equals(bCryptPasswordEncoder.encode(request.getExistingPassword()))){
             if(bCryptPasswordEncoder.matches(request.getExistingPassword() ,member.getPassword())){
                 memberRepository.save(member.updatePassword(request.getNewPassword()));
             }
@@ -82,14 +75,6 @@ public class MemberService {
             }
         }
         throw new IllegalStateException("올바르지 않은 접근입니다.");
-    }
-    // 마지막 접속 ip 저장 메서드
-    private void updateMemberIp(String email, String ip){
-        Optional<Member> optionalMember = memberRepository.findByEmail(email);
-        optionalMember.ifPresent(member -> {
-            member.setLastIpAddress(ip);
-            memberRepository.save(member);
-        });
     }
     public Member findByEmail(String email){
         return memberRepository.findByEmail(email)
@@ -117,7 +102,8 @@ public class MemberService {
         }
         Member member = memberRepository.findByEmail(requestMemberEmail).orElseThrow(()->
                 new IllegalArgumentException("가져올 회원정보가 존재하지않습니다."));
-        return new MemberDataResponse(member, isOauthUser());
+        MemberLoginLog memberLoginLog = memberLoginLogService.getMemberLoginLog(member);
+        return new MemberDataResponse(member, isOauthUser(), memberLoginLog);
     }
 
     public boolean isOauthUser(){
