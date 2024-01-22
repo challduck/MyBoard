@@ -19,8 +19,12 @@ function getMyPageData(){
             }
         })
     }
+    function fail(){
+        alert("로그인 후 확인 가능합니다.");
+        window.location.href = "/";
+    }
 
-     httpRequest('GET','/api/user/my-page',null,success,null);
+     httpRequest('GET','/api/user/my-page',null,success,fail);
 }
 
 // edit modal open

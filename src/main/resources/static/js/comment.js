@@ -75,7 +75,7 @@ function addCommentInput(articleId){
     commentCreateBtn.className = 'btn btn-primary mb-2';
     commentCreateBtn.id = 'comment-create-btn';
     commentCreateBtn.addEventListener('click',()=>{
-        if(localStorage.getItem('accessToken')===null && getCookie('refreshToken') === null){
+        if(localStorage.getItem('access_token')===null && getCookie('refresh_token') === null){
             alert('로그인 후 댓글을 작성 해주세요.');
         }
         else {

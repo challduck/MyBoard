@@ -18,8 +18,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class ArticleService {
     private final ArticleRepository articleRepository;
-    private final Map<String, Long> ipLastAccessMap = new ConcurrentHashMap<>();
-    private static final long ACCESS_INTERVAL = 5 * 60 * 1000; // 5분
+    // private final Map<String, Long> ipLastAccessMap = new ConcurrentHashMap<>();
+    // private static final long ACCESS_INTERVAL = 5 * 60 * 1000; // 5분
     public List<Article> findAllByOrderByArticleIdDesc() {
         return articleRepository.findAllByOrderByArticleIdDesc();
     }
@@ -34,36 +34,18 @@ public class ArticleService {
 
     // 게시글 상세 조회
     public Article findById(Long id) {
-        return articleRepository.findById(id)
-                .orElseThrow(()-> new IllegalArgumentException("not found: "+id));
+        return articleRepository.findByArticleId(id);
+//                .orElseThrow(()-> new IllegalArgumentException("not found: "+id));
     }
 
     // 게시글 조회수 증가 메서드
     @Transactional
-    public void increaseHitCount(String clientIp, Long articleId){
-        if (!isDuplicateAccess(clientIp)){
-            Article article = articleRepository.findById(articleId).orElse(null);
-            if (article != null){
-                article.setHitCount(article.getHitCount() + 1);
-                articleRepository.save(article);
-                updateLastAccess(clientIp);
-            }
+    public void increaseHitCount(Long articleId){
+        Article article = articleRepository.findById(articleId).orElse(null);
+        if (article != null){
+            article.setHitCount(article.getHitCount() + 1);
+            articleRepository.save(article);
         }
-    }
-
-    // article 상세페이지 중복 접근 확인 메서드
-    private boolean isDuplicateAccess(String clientIp){
-        Long lastAccess = ipLastAccessMap.get(clientIp);
-
-        if(lastAccess != null){
-            long currentTile = System.currentTimeMillis();
-            return (currentTile - lastAccess) < ACCESS_INTERVAL;
-        }
-        return false;
-    }
-
-    private void updateLastAccess(String clientIp){
-        ipLastAccessMap.put(clientIp, System.currentTimeMillis());
     }
 
     @Transactional

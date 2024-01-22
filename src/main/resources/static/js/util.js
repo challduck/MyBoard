@@ -9,7 +9,14 @@ function httpRequest(method, url, body, success, fail) {
         body: body,
     }).then(response => {
         if (response.status === 200 || response.status === 201) {
-            return success(response.json());
+
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.includes("application/json")){
+                return success(response.json());
+            }
+            else {
+                return success();
+            }
         }
         const refresh_token = getCookie('refresh_token');
         if (response.status === 401 && refresh_token) {

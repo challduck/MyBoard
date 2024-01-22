@@ -50,7 +50,7 @@ public class Article {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "articleId", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "articleId", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Comment> comments = new ArrayList<>();
 
     @Builder

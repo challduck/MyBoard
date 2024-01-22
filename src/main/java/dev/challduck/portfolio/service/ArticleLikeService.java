@@ -16,12 +16,15 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ArticleLikeService {
     private final ArticleLikeRepository articleLikeRepository;
-
-    public ArticleLikeViewResponse getArticleLike(Article article){
-        if(article==null){
-            return new ArticleLikeViewResponse(articleLikeRepository.countByArticleId(article));
+    private final ArticleRepository articleRepository;
+    public ArticleLikeViewResponse getArticleLike(Long articleId){
+        Article article = articleRepository.findByArticleId(articleId);
+        Long articleLikeCount = articleLikeRepository.countByArticleId(article);
+        if (articleLikeCount != null){
+            return new ArticleLikeViewResponse(articleLikeCount);
+        }else {
+            return new ArticleLikeViewResponse(0L);
         }
-        return new ArticleLikeViewResponse(0L);
     }
 
     @Transactional

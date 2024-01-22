@@ -78,8 +78,8 @@ public class ArticleApiController {
             @RequestHeader(value = "X-Forwarded-For", defaultValue = "") String xForwardedFor){
         try{
             Article article = articleService.findById(id);
-            String clientIp = xForwardedFor != null ? xForwardedFor.split(",")[0].trim() : "Unknown";
-            articleService.increaseHitCount(clientIp, id);
+//            String clientIp = xForwardedFor != null ? xForwardedFor.split(",")[0].trim() : "Unknown";
+            articleService.increaseHitCount(id);
             return ResponseEntity.ok().body(new ArticleViewResponse(article));
 
         } catch (Exception e){

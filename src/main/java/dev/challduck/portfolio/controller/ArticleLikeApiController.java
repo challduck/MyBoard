@@ -30,7 +30,7 @@ public class ArticleLikeApiController {
     @ApiResponse(responseCode = "400",description = "추천수를 가져올 게시글이 존재하지않습니다.")
     @GetMapping("/articles/{id}/like")
     public ResponseEntity<ArticleLikeViewResponse> getArticleLike(@PathVariable @Parameter(description = "추천수를 조회할 게시글 Id", example = "1") Long id){
-        ArticleLikeViewResponse response = articleLikeService.getArticleLike(articleService.findById(id));
+        ArticleLikeViewResponse response = articleLikeService.getArticleLike(id);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
